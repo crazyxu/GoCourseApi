@@ -59,6 +59,9 @@ public class JsonHelper {
                     else if(method.getParameterTypes()[0].getName().equals(JSONObject.class.getName())){
                         method.invoke(javabean, (JSONObject)(data.get(field)));
                     }
+                    else if(method.getParameterTypes()[0].getName().equals(Map.class.getName())){
+                        method.invoke(javabean, jsonStrToMap((String) data.get(field)));
+                    }
 
                 }
             } catch (Exception e) {

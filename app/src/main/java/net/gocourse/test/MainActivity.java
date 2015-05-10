@@ -7,14 +7,12 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -30,7 +28,7 @@ public class MainActivity extends ActionBarActivity {
     ListView lv;
 
     //
-    String[] arrLv=new String[]{"用户管理","课程管理"};
+    String[] arrLv=new String[]{"用户账号","用户信息"};
 
     String barTitle=arrLv[0];
     @Override
@@ -47,7 +45,7 @@ public class MainActivity extends ActionBarActivity {
         bar=getSupportActionBar();
         bar.setDisplayHomeAsUpEnabled(true);
         //默认初试fragment
-        bar.setTitle("用户管理");
+        bar.setTitle("用户账号");
         bar.show();
     }
     void initLV(){
@@ -62,10 +60,10 @@ public class MainActivity extends ActionBarActivity {
                 Fragment f=null;
                 switch (position){
                     case 0:
-                        f=new UserTestFra();
+                        f=new UserAccountFra();
                         break;
                     case 1:
-                        f=new CourseTestFra();
+                        f=new UserInfoFra();
                         break;
                 }
                 ft.replace(R.id.fragment_layout, f);
@@ -102,7 +100,7 @@ public class MainActivity extends ActionBarActivity {
         };
         drawer.setDrawerListener(drawerToggle);
         FragmentTransaction ft=getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fragment_layout, new UserTestFra());
+        ft.replace(R.id.fragment_layout, new UserAccountFra());
         ft.commit();
     }
 

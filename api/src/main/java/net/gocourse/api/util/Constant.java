@@ -22,6 +22,8 @@ public class Constant {
     //注销
     public final static String ACTION_USER_LOGOUT="http://loveyu.website/gocourse/user_action/logout";
 
+    //获取个人信息
+    public final static String ACTION_USER_INFO="http://loveyu.website/gocourse/user/info";
 
     public final static String CLIENT_TYPE="android";
 }
