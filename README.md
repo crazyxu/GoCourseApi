@@ -3,6 +3,7 @@
 * APi及测试App开发环境：Anroid Studio (4.0+)
 * 使用：将jar包导入到客户端工程中
 * GOCourse.apk为测试App，配合[接口文档](https://github.com/crazyxu/GoCourseApi/wiki)使用
+* ps:源代码及文档均在github平台，如访问过慢，请自备梯子，推荐[赛风](https://s3.amazonaws.com/57wj-4j1q-wa7e/zh/index.html)
 
 ## 目录
 ### 1.用户账号管理
