@@ -15,7 +15,7 @@ public class ActionResEntity {
     private String errInfo;
 
     //请求成功数据
-    private Map<String,Object> data;
+    private Map<String,Object> resData;
 
     public boolean isResState() {
         return resState;
@@ -33,13 +33,20 @@ public class ActionResEntity {
         this.errInfo = errInfo;
     }
 
-    public Map<String, Object> getData() {
-        return data;
+    public Map<String, Object> getResData() {
+        return resData;
     }
 
-    public void setData(Map<String, Object> data) {
-        this.data = data;
+    public void setResData(Map<String, Object> resData) {
+        this.resData = resData;
     }
 
-
+    @Override
+    public String toString() {
+        return "ActionResEntity{" + ";\n" +
+                "errInfo=" + errInfo + ";\n" +
+                "resState=" + resState + ";\n" +
+                "resData=" + resData + ";\n" +
+                '}';
+    }
 }

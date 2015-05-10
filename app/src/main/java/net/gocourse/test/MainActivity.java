@@ -1,52 +1,111 @@
 package net.gocourse.test;
 
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
-
-import net.gocourse.api.action.UserManager;
-import net.gocourse.api.bean.ActionResEntity;
-
-import java.util.Map;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
 
 
 public class MainActivity extends ActionBarActivity {
-    private TextView log;
+    private MyApplication app;
+    //drawer
+    private DrawerLayout drawer;
+
+    private ActionBar bar;
+    //却换箭头
+    private ActionBarDrawerToggle drawerToggle;
+
+    //功能列表
+    ListView lv;
+
+    //
+    String[] arrLv=new String[]{"用户管理","课程管理"};
+
+    String barTitle=arrLv[0];
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        log=(TextView)super.findViewById(R.id.log);
-        new Thread(
-            new Runnable() {
-                @Override
-                public void run() {
-                    userLoginTest();
+        initApp();
+        initDrawer();
+        initLV();
+    }
+
+    void initApp(){
+        app=(MyApplication)getApplication();
+        bar=getSupportActionBar();
+        bar.setDisplayHomeAsUpEnabled(true);
+        //默认初试fragment
+        bar.setTitle("用户管理");
+        bar.show();
+    }
+    void initLV(){
+        lv=(ListView)super.findViewById(R.id.lv_dl);
+        //简单的ArrayAdapter
+        lv.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,arrLv));
+        //设置监听
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                FragmentTransaction ft=getSupportFragmentManager().beginTransaction();
+                Fragment f=null;
+                switch (position){
+                    case 0:
+                        f=new UserTestFra();
+                        break;
+                    case 1:
+                        f=new CourseTestFra();
+                        break;
                 }
+                ft.replace(R.id.fragment_layout, f);
+                ft.commit();
+                barTitle=arrLv[position];
+                bar.setTitle(barTitle);
+                drawer.closeDrawer(lv);
+
             }
-        ).start();
+        });
     }
 
-    //注册
-    void userRegTest(){
-        ActionResEntity resEntity= new UserManager().userReg("3844545014@qq.com", "123456");
-        if(resEntity.isResState())
-            Log.i("userRegTest","用户注册成功");
-        else
-            Log.i("userRegTest","用户注册失败");
+    /**
+     * 初始化DrawerLayout
+     */
+    void initDrawer(){
+        drawer = (DrawerLayout) super.findViewById(R.id.drawer);
+        drawerToggle = new ActionBarDrawerToggle(
+                this,                  /* host Activity */
+                drawer,         /* DrawerLayout object */
+                R.string.drawer_open,  /* "open drawer" description for accessibility */
+                R.string.drawer_close  /* "close drawer" description for accessibility */
+        ){
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                bar.setTitle(barTitle);
+                // invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                bar.setTitle(getResources().getString(R.string.app_name));
+                //  invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+        };
+        drawer.setDrawerListener(drawerToggle);
+        FragmentTransaction ft=getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.fragment_layout, new UserTestFra());
+        ft.commit();
     }
 
-    //登录
-    void userLoginTest(){
-        ActionResEntity resEntity= new UserManager().userLogin("384454501@qq.com", "123456");
-        if(resEntity.isResState())
-            Log.i("userRegTest","用户登录成功");
-        else
-            Log.i("userRegTest","用户登录失败");
-    }
 
 
     @Override
@@ -58,14 +117,15 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()){
+            case R.id.action_settings:
+                break;
+            case android.R.id.home:
+                if(drawer.isDrawerOpen(lv))
+                    drawer.closeDrawer(lv);
+                else
+                    drawer.openDrawer(lv);
+                break;
         }
 
         return super.onOptionsItemSelected(item);

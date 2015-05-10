@@ -13,4 +13,10 @@ public interface UserManagerInterface {
 
     //用户登录
     public ActionResEntity userLogin(String userName,String pwd);
+
+    //修改密码
+    public ActionResEntity changPwd(String token,String oldPwd,String newPwd);
+
+    //注销
+    public  ActionResEntity userLogout(String token);
 }

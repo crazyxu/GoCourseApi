@@ -3,6 +3,7 @@ package net.gocourse.api.util;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -30,4 +31,52 @@ public class JsonHelper {
         }
         return result;
     }
+
+    /**
+     *
+     * @param javabean
+     * @param data
+     * @return
+     */
+    public static Object mapToBean(Object javabean, Map data) {
+        Method[] methods = javabean.getClass().getDeclaredMethods();
+        for (Method method : methods) {
+            try {
+                if (method.getName().startsWith("set")) {
+                    String field = method.getName();
+                    field = field.substring(field.indexOf("set") + 3);
+                    field = field.toLowerCase().charAt(0) + field.substring(1);
+                    //判断参数类型
+                    if(method.getParameterTypes()[0].getName().equals("int")){
+                        method.invoke(javabean,Integer.valueOf((String)data.get(field)));
+                    }
+                    else if(method.getParameterTypes()[0].getName().equals(String.class.getName())){
+                        method.invoke(javabean, (String)(data.get(field)));
+                    }
+                    else if(method.getParameterTypes()[0].getName().equals("boolean")){
+                        method.invoke(javabean, (boolean)(data.get(field)));
+                    }
+                    else if(method.getParameterTypes()[0].getName().equals(JSONObject.class.getName())){
+                        method.invoke(javabean, (JSONObject)(data.get(field)));
+                    }
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return javabean;
+    }
+
+    /**
+     *
+     * @param javabean
+     * @param jsonStr
+     * @return
+     * @throws JSONException
+     */
+    public static Object jsonStrToBean(Object javabean,String jsonStr) throws JSONException{
+        return mapToBean(javabean,jsonStrToMap(jsonStr));
+    }
+
 }

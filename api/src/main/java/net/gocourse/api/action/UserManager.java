@@ -3,9 +3,10 @@ package net.gocourse.api.action;
 import android.util.Log;
 
 import net.gocourse.api.bean.ActionResEntity;
+import net.gocourse.api.bean.JsonBean;
+import net.gocourse.api.bean.VerifyJsonBean;
 import net.gocourse.api.imp.UserManagerInterface;
 import net.gocourse.api.server.UserServer;
-import net.gocourse.api.util.HttpReqUtil;
 import net.gocourse.api.util.JsonHelper;
 
 import java.util.HashMap;
@@ -17,39 +18,48 @@ import java.util.Map;
  * Introduce 用户管理相关操作
  */
 public class UserManager implements UserManagerInterface {
+    //传递给移动端数据对象
     private ActionResEntity resEntity;
+
     //构造函数，初始化ActionResEntity
     public UserManager(){
         resEntity=new ActionResEntity();
     }
+
+    /**
+     * 登录
+     * @param email
+     * @param pwd
+     * @return
+     */
     @Override
-    public ActionResEntity userReg(String email, String pwd) {
-        //从服务器获取的json格式字符串
-        String jsonStr= UserServer.userReg(email,pwd);
+    public ActionResEntity userLogin(String email, String pwd) {
         try{
-            //将json格式字符串转化成Map格式
-            Map<String,Object> jsonData=JsonHelper.jsonStrToMap(jsonStr);
-            if (jsonData!=null){
-                //获取用户操作状态
-                boolean status=(boolean)jsonData.get("status");
-                if (status){
-                    //登录成功
-                    resEntity.setResState(true);
-                    Map<String,Object> data=new HashMap<String,Object>();
-                    //token：用户验证标识
-                    data.put("token",jsonData.get("token"));
-                    //expire：用户在线状态有效期
-                    data.put("expire",jsonData.get("expire"));
-                    resEntity.setData(data);
-                }else{
-                    //登录失败
-                    resEntity.setResState(false);
-                    resEntity.setErrInfo((String)jsonData.get("msg"));
-                }
-                return resEntity;
+            //从服务器获取的json格式字符串
+            String jsonStr= UserServer.userLogin(email,pwd);
+            //实例化JsonBean
+            JsonBean jsonBean=new JsonBean();
+            //获取数据
+            JsonHelper.jsonStrToBean(jsonBean, jsonStr);
+            //判断是否登录成功
+            if (jsonBean.getStatus()){
+                resEntity.setResState(true);
+                //将jsonBean中的data（JsonObject）再次解析为VerifyJsonBean对象
+                VerifyJsonBean verifyJsonBean=new VerifyJsonBean();
+                JsonHelper.jsonStrToBean(verifyJsonBean, jsonBean.getData().toString());
+                Map<String,Object> map=new HashMap<String,Object>();
+                //添加token和expire数据值
+                map.put("token",verifyJsonBean.getToken());
+                map.put("expire",verifyJsonBean.getExpire());
+                resEntity.setResData(map);
+            }else{
+                //失败
+                resEntity.setResState(false);
+                resEntity.setErrInfo(jsonBean.getMsg());
             }
+            return resEntity;
         }catch (Exception e){
-            Log.e("UserManager->userReg", e.toString());
+            Log.e("UserManager->userLogin", e.toString());
         }
         //执行到此，表示程序异常
         resEntity.setResState(false);
@@ -57,29 +67,102 @@ public class UserManager implements UserManagerInterface {
         return resEntity;
     }
 
+    /**
+     * 注册
+     * @param userName
+     * @param pwd
+     * @return
+     */
     @Override
-    public ActionResEntity userLogin(String userName, String pwd) {
+    public ActionResEntity userReg(String userName, String pwd) {
         //服务器返回的json格式字符串
-        String jsonStr=UserServer.userLogin(userName,pwd);
+        String jsonStr=UserServer.userReg(userName,pwd);
         try{
-            //将json格式字符串转化成Map格式
-            Map<String,Object> jsonData=JsonHelper.jsonStrToMap(jsonStr);
-            if (jsonData!=null) {
-                //获取用户操作状态
-                boolean status = (boolean) jsonData.get("status");
-                if (status) {
-                    //注册成功
-                    resEntity.setResState(true);
-                }else {
-                    //注册失败
-                    resEntity.setResState(false);
-                    resEntity.setErrInfo((String)jsonData.get("msg"));
-                }
-                //结束函数
-                return resEntity;
+            //实例化JsonBean
+            JsonBean jsonBean=new JsonBean();
+            //获取数据
+            JsonHelper.jsonStrToBean(jsonBean,jsonStr);
+            //判断是否登录成功
+            if (jsonBean.getStatus()){
+                resEntity.setResState(true);
+            }else{
+                //失败
+                resEntity.setResState(false);
+                resEntity.setErrInfo(jsonBean.getMsg());
             }
+             return resEntity;
+
         }catch (Exception e){
-            Log.e("UserManager->userLogin",e.toString());
+            Log.e("UserManager->userReg",e.toString());
+        }
+        //执行到此，表示程序异常
+        resEntity.setResState(false);
+        resEntity.setErrInfo("系统异常");
+        return resEntity;
+    }
+
+    /**
+     * 修改密码
+     * @param token
+     * @param oldPwd
+     * @param newPwd
+     * @return
+     */
+    @Override
+    public ActionResEntity changPwd(String token, String oldPwd, String newPwd) {
+        //服务器返回的json格式字符串
+        String jsonStr=UserServer.changPwd(token,oldPwd, newPwd);
+        try{
+            //实例化JsonBean
+            JsonBean jsonBean=new JsonBean();
+            //获取数据
+            JsonHelper.jsonStrToBean(jsonBean,jsonStr);
+            //判断是否登录成功
+            if (jsonBean.getStatus()){
+                resEntity.setResState(true);
+                //将jsonBean中的data（JsonObject）再次解析为VerifyJsonBean对象
+                VerifyJsonBean verifyJsonBean=new VerifyJsonBean();
+                JsonHelper.jsonStrToBean(verifyJsonBean, jsonBean.getData().toString());
+                Map<String,Object> map=new HashMap<String,Object>();
+                //添加token和expire数据值
+                map.put("token",verifyJsonBean.getToken());
+                map.put("expire",verifyJsonBean.getExpire());
+                resEntity.setResData(map);
+            }else{
+                resEntity.setResState(false);
+                resEntity.setErrInfo(jsonBean.getMsg());
+            }
+            return resEntity;
+        }catch (Exception e){
+            Log.e("UserManager->changPwd",e.toString());
+        }
+        //执行到此，表示程序异常
+        resEntity.setResState(false);
+        resEntity.setErrInfo("系统异常");
+        return resEntity;
+    }
+
+    //注销
+    @Override
+    public ActionResEntity userLogout(String token) {
+        try{
+            //从服务器获取的json格式字符串
+            String jsonStr= UserServer.userLogout(token);
+            //实例化JsonBean
+            JsonBean jsonBean=new JsonBean();
+            //获取数据
+            JsonHelper.jsonStrToBean(jsonBean, jsonStr);
+            //判断是否登录成功
+            if (jsonBean.getStatus()){
+                resEntity.setResState(true);
+            }else{
+                //失败
+                resEntity.setResState(false);
+                resEntity.setErrInfo(jsonBean.getMsg());
+            }
+            return resEntity;
+        }catch (Exception e){
+            Log.e("UserManager->userLogin", e.toString());
         }
         //执行到此，表示程序异常
         resEntity.setResState(false);
